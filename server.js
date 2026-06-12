@@ -12,16 +12,20 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ---- Middleware ----
-app.use(cors());                 // allow requests from your frontend
-app.use(express.json());         // parse JSON request bodies
-app.use(express.static('.'));    // serve index.html and other static files
+app.use(cors({
+  origin: '*',        // allow all origins (frontend on Vercel, localhost, anywhere)
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+app.use(express.json());
+app.use(express.static('.'));
 
 // ---- Email transporter (uses your Gmail account) ----
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,  // your gmail address
-    pass: process.env.EMAIL_PASS   // your Gmail "App Password" (NOT your normal password)
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
@@ -50,8 +54,8 @@ app.post('/api/contact', async (req, res) => {
   try {
     await transporter.sendMail({
       from: `"Portfolio Contact Form" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,     // <-- messages land in YOUR inbox
-      replyTo: email,                 // lets you hit "Reply" to respond to the sender directly
+      to: process.env.EMAIL_USER,
+      replyTo: email,
       subject: `New portfolio message from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
       html: `
